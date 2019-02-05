@@ -100,6 +100,7 @@
     "kcors": "^2.2.2",
     "koa": "^2.6.2",
     "koa-bodyparser": "^4.2.1",
+    "koa-graphql": "^0.8.0",
     "koa-passport": "^4.1.1",
     "koa-router": "^7.4.0",
     "koa-send": "^5.0.0",
