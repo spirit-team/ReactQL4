@@ -8,7 +8,7 @@ import * as React from "react";
 
 // Use the `<Query>` component from the React Apollo lib to declaratively
 // fetch the GraphQL data, to display as part of our component
-import { Query } from "react-apollo";
+import { useQuery } from "@apollo/client";
 
 // Emotion styled component
 import styled from "@emotion/styled";
@@ -55,36 +55,34 @@ const Story = styled("li")`
 // whatever the server has sent it - or, if it's a client-navigated route that
 // doesn't already have data from the server -- it'll display a loading message
 // while the data is being retrieved
-export default () => (
-  <Query<IHackerNewsTopStories> query={hackerNewsQuery}>
-    {result => {
-      // Any errors? Say so!
-      if (result.error) {
-        return <h1>Error retrieving news stories! &mdash; {result.error}</h1>;
-      }
+const hackerNews = () => {
+  const { data: requestData, loading: requestLoading, error: requestError} = useQuery<IHackerNewsTopStories>(hackerNewsQuery);
 
-      // If the data is still loading, return with a basic
-      // message to alert the user
-      if (result.loading) {
-        return <h1>Loading Hacker News stories...</h1>;
-      }
+  // Any errors? Say so!
+  if (requestError) {
+    return <h1>Error retrieving news stories! &mdash; {requestError}</h1>;
+  }
 
-      // Otherwise, we have data to work with... map over it with a
-      // bullet-point list
-      return (
-        <>
-          <h3>Top stories from Hacker News</h3>
-          <List>
-            {result.data!.hn.topStories.map(story => (
-              <Story key={story.id}>
-                <a href={story.url} target="_blank">
-                  {story.title}
-                </a>
-              </Story>
-            ))}
-          </List>
-        </>
-      );
-    }}
-  </Query>
-);
+  // If the data is still loading, return with a basic
+  // message to alert the user
+  if (requestLoading) {
+    return <h1>Loading Hacker News stories...</h1>;
+  }  
+
+  return (
+    <>
+      <h3>Top stories from Hacker News</h3>
+      <List>
+        {requestData?.hn?.topStories?.map(story => (
+          <Story key={story.id}>
+            <a href={story.url} target="_blank">
+              {story.title}
+            </a>
+          </Story>
+        ))}
+      </List>
+    </>
+  );
+}
+
+export default hackerNews;

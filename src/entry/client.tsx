@@ -12,7 +12,7 @@ import createBrowserHistory from "history/createBrowserHistory";
 import * as React from "react";
 
 // HOC for enabling Apollo GraphQL `<Query>` and `<Mutation>`
-import { ApolloProvider } from "react-apollo";
+import { ApolloProvider } from "@apollo/client";
 
 // Attach React to the browser DOM
 import * as ReactDOM from "react-dom";
@@ -31,7 +31,7 @@ import { createClient } from "@/lib/apollo";
 // MobX state
 import { State } from "@/data/state";
 import { rehydrate, StateProvider } from "@/lib/mobx";
-import { resolvePtr } from "dns";
+// import { resolvePtr } from "dns";
 
 // ----------------------------------------------------------------------------
 

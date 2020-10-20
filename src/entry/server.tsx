@@ -15,7 +15,8 @@ import * as React from "react";
 import { Context } from "koa";
 
 // Apollo GraphQL
-import { ApolloProvider, getDataFromTree } from "react-apollo";
+import { ApolloProvider } from "@apollo/client";
+import { getDataFromTree } from "@apollo/client/react/ssr";
 
 // MobX state management
 import { toJS } from "mobx";

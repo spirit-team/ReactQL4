@@ -4,32 +4,46 @@
 // IMPORTS
 
 /* NPM */
-import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
-import { ApolloClient } from "apollo-client";
-import { ApolloLink, split } from "apollo-link";
-import { onError } from "apollo-link-error";
-import { HttpLink } from "apollo-link-http";
-import { WebSocketLink } from "apollo-link-ws";
-import { getMainDefinition } from "apollo-utilities";
-import { SubscriptionClient } from "subscriptions-transport-ws";
+import { ApolloClient, InMemoryCache, NormalizedCacheObject, ApolloLink } from '@apollo/client';
+import { onError } from "@apollo/client/link/error";
+// import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
+// import { ApolloClient } from "apollo-client";
+// import { ApolloLink/* , split */ } from "apollo-link";
+// import { onError } from "apollo-link-error";
+// import { HttpLink } from "apollo-link-http";
+// import { WebSocketLink } from "apollo-link-ws";
+// import { getMainDefinition } from "apollo-utilities";
+// import { SubscriptionClient } from "subscriptions-transport-ws";
+import { createUploadLink } from 'apollo-upload-client';
+
+/* Local */
+import { State } from "@/data/state";
 
 // ----------------------------------------------------------------------------
 
-export function createClient(): ApolloClient<NormalizedCacheObject> {
+export function createClient(
+  // @ts-ignore - useful to pass in the store for `Authorization` headers, etc
+  state: State
+  ): ApolloClient<NormalizedCacheObject> {
   // Create the cache first, which we'll share across Apollo tooling.
   // This is an in-memory cache. Since we'll be calling `createClient` on
   // universally, the cache will survive until the HTTP request is
   // responded to (on the server) or for the whole of the user's visit (in
   // the browser)
   const cache = new InMemoryCache();
+  // the line of code below is meant to prevent adding __typename to all query
+  // result but it causes issues in the IS Portal Homepage
+  // const cache = new InMemoryCache({addTypename: false});
 
   // Create a HTTP client (both server/client). It takes the GraphQL
   // server from the `GRAPHQL` environment variable, which by default is
   // set to an external playground at https://graphqlhub.com/graphql
-  const httpLink = new HttpLink({
-    credentials: "same-origin",
-    uri: GRAPHQL
-  });
+  // const httpLink = new HttpLink({
+  //   credentials: "same-origin",
+  //   uri: GRAPHQL
+  // });
+
+  const uploadLink =  createUploadLink({ uri: GRAPHQL, credentials: "same-origin", })
 
   // If we're in the browser, we'd have received initial state from the
   // server. Restore it, so the client app can continue with the same data.
@@ -37,52 +51,72 @@ export function createClient(): ApolloClient<NormalizedCacheObject> {
     cache.restore((window as any).__APOLLO_STATE__);
   }
 
+  // const link = ApolloLink.from([
+  //   // General error handler, to log errors back to the console.
+  //   // Replace this in production with whatever makes sense in your
+  //   // environment. Remember you can use the global `SERVER` variable to
+  //   // determine whether you're running on the server, and record errors
+  //   // out to third-party services, etc
+  //   onError(({ graphQLErrors, networkError }) => {
+  //     if (graphQLErrors) {
+  //       graphQLErrors.map(({ message, locations, path }) =>
+  //         console.log(
+  //           `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+  //         )
+  //       );
+  //     }
+  //     if (networkError) {
+  //       console.log(`[Network error]: ${networkError}`);
+  //     }
+  //   }),
+
+  //   // Split on HTTP and WebSockets
+  //   WS_SUBSCRIPTIONS && !SERVER
+  //     ? split(
+  //         ({ query }) => {
+  //           const definition = getMainDefinition(query);
+  //           return (
+  //             definition.kind === "OperationDefinition" &&
+  //             definition.operation === "subscription"
+  //           );
+  //         },
+  //         // Use WebSockets for subscriptions
+  //         new WebSocketLink(
+  //           (GRAPHQL.startsWith("https")) ?
+  //           // Replace http(s) with `ws` for connecting via WebSockts
+  //           new SubscriptionClient(GRAPHQL.replace(/^https?/, "wss"), {
+  //             reconnect: true // <-- automatically redirect as needed
+  //           })
+  //           :new SubscriptionClient(GRAPHQL.replace(/^http?/, "ws"), {
+  //             reconnect: true // <-- automatically redirect as needed
+  //           })
+  //         ),
+  //         // ... fall-back to HTTP for everything else
+  //         httpLink
+  //       )
+  //     : httpLink // <-- just use HTTP on the server
+  // ]);
+
+  const newLink = ApolloLink.from([
+    onError(({ graphQLErrors, networkError }) => {
+      if (graphQLErrors)
+        graphQLErrors.map(({ message, locations, path }) =>
+          console.log(
+            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+          )
+        );
+      if (networkError) console.log(`[Network error]: ${networkError}`);
+    }),
+    (uploadLink as unknown) as ApolloLink
+  ])
+
   // Return a new Apollo Client back, with the cache we've just created,
   // and an array of 'links' (Apollo parlance for GraphQL middleware)
   // to tell Apollo how to handle GraphQL requests
   return new ApolloClient({
     cache,
-    link: ApolloLink.from([
-      // General error handler, to log errors back to the console.
-      // Replace this in production with whatever makes sense in your
-      // environment. Remember you can use the global `SERVER` variable to
-      // determine whether you're running on the server, and record errors
-      // out to third-party services, etc
-      onError(({ graphQLErrors, networkError }) => {
-        if (graphQLErrors) {
-          graphQLErrors.map(({ message, locations, path }) =>
-            console.log(
-              `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-            )
-          );
-        }
-        if (networkError) {
-          console.log(`[Network error]: ${networkError}`);
-        }
-      }),
-
-      // Split on HTTP and WebSockets
-      WS_SUBSCRIPTIONS && !SERVER
-        ? split(
-            ({ query }) => {
-              const definition = getMainDefinition(query);
-              return (
-                definition.kind === "OperationDefinition" &&
-                definition.operation === "subscription"
-              );
-            },
-            // Use WebSockets for subscriptions
-            new WebSocketLink(
-              // Replace http(s) with `ws` for connecting via WebSockts
-              new SubscriptionClient(GRAPHQL.replace(/^https?/, "ws"), {
-                reconnect: true // <-- automatically redirect as needed
-              })
-            ),
-            // ... fall-back to HTTP for everything else
-            httpLink
-          )
-        : httpLink // <-- just use HTTP on the server
-    ]),
+    link: newLink,
+    // link: (uploadLink as unknown) as ApolloLink, // testLink, // createUploadLink({ uri: GRAPHQL, credentials: "same-origin", }),
     // On the server, enable SSR mode
     ssrMode: SERVER
   });

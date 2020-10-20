@@ -7,7 +7,7 @@
 
 // GraphQL tag library, for creating GraphQL queries from plain
 // template text
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 // ----------------------------------------------------------------------------
 
