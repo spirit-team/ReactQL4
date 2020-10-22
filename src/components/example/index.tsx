@@ -7,11 +7,6 @@
 
 import * as React from "react";
 
-/* Local */
-
-// Counter, controlled by local Apollo state
-import Count from "./count";
-
 // Hacker News GraphQL example
 import HackerNews from "./hackernews";
 
@@ -45,7 +40,6 @@ class Index extends React.PureComponent<{}, IIndexState> {
         {/* Note: The <h1> style will have a yellow background due to @/global/styles.ts! */}
         <h1>Hi from ReactQL</h1>
         <DynamicComponent />
-        <Count />
         <HackerNews />
       </>
     );

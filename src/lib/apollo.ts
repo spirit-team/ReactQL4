@@ -16,15 +16,9 @@ import { onError } from "@apollo/client/link/error";
 // import { SubscriptionClient } from "subscriptions-transport-ws";
 import { createUploadLink } from 'apollo-upload-client';
 
-/* Local */
-import { State } from "@/data/state";
-
 // ----------------------------------------------------------------------------
 
-export function createClient(
-  // @ts-ignore - useful to pass in the store for `Authorization` headers, etc
-  state: State
-  ): ApolloClient<NormalizedCacheObject> {
+export function createClient(): ApolloClient<NormalizedCacheObject> {
   // Create the cache first, which we'll share across Apollo tooling.
   // This is an in-memory cache. Since we'll be calling `createClient` on
   // universally, the cache will survive until the HTTP request is

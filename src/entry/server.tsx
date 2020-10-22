@@ -18,9 +18,6 @@ import { Context } from "koa";
 import { ApolloProvider } from "@apollo/client";
 import { getDataFromTree } from "@apollo/client/react/ssr";
 
-// MobX state management
-import { toJS } from "mobx";
-
 // React utility to transform JSX to HTML (to send back to the client)
 import * as ReactDOMServer from "react-dom/server";
 
@@ -31,19 +28,11 @@ import Helmet from "react-helmet";
 // React SSR routers
 import { StaticRouter } from "react-router";
 
-/* Local */
-
 // Root component
 import Root from "@/components/root";
 
 // Utility for creating a per-request Apollo client
 import { createClient } from "@/lib/apollo";
-
-// State class, containing all of our user-land state fields
-import { State } from "@/data/state";
-
-// <StateProvider> lets us send per-request state down a React chain
-import { StateProvider } from "@/lib/mobx";
 
 // Class for handling Webpack stats output
 import Output from "@/lib/output";
@@ -67,22 +56,17 @@ export default function(output: Output) {
     // Create a new Apollo client
     const client = createClient();
 
-    // Create new MobX state
-    const state = new State();
-
     // Create a fresh 'context' for React Router
     const routerContext: IRouterContext = {};
 
-    // Render our components - passing down MobX state, a GraphQL client,
+    // Render our components - passing down a GraphQL client,
     // and a router for rendering based on our route config
     const components = (
-      <StateProvider value={state}>
-        <ApolloProvider client={client}>
-          <StaticRouter location={ctx.request.url} context={routerContext}>
-            <Root />
-          </StaticRouter>
-        </ApolloProvider>
-      </StateProvider>
+      <ApolloProvider client={client}>
+        <StaticRouter location={ctx.request.url} context={routerContext}>
+          <Root />
+        </StaticRouter>
+      </ApolloProvider>
     );
 
     // Await GraphQL data coming from the API server
@@ -125,7 +109,6 @@ export default function(output: Output) {
         scripts={output.client.scripts()}
         window={{
           __APOLLO_STATE__: client.extract(), // <-- GraphQL store
-          __STATE__: toJS(state) // <-- MobX state
         }}
       />
     );

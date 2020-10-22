@@ -11,6 +11,7 @@ RUN apk add --no-cache python2 make g++ curl openssl ca-certificates
 WORKDIR /build
 ADD package*.json ./
 RUN npm i
+RUN npm audit fix
 
 # add source
 ADD . .
