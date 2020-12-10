@@ -1,5 +1,5 @@
 #FROM node:11.8.0-alpine AS builder
-FROM node:12.19.0-alpine3.12 AS builder
+FROM node:12.20.0-alpine3.12 AS builder
 
 # log most things
 ENV NPM_CONFIG_LOGLEVEL notice
@@ -22,7 +22,7 @@ RUN npm run build:production
 ########################
 
 #FROM node:11.8.0-alpine
-FROM node:12.19.0-alpine3.12
+FROM node:12.20.0-alpine3.12
 WORKDIR /app
 
 RUN apk update && apk add --no-cache curl openssl ca-certificates
