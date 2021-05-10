@@ -137,7 +137,7 @@
     "koa-session-ts": "^0.2.3",
     "koa2-history-api-fallback": "0.0.5",
     "lint-staged": "^8.1.4",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "match-sorter": "^4.1.0",
     "material-ui-dropzone": "^3.5.0",
     "microseconds": "^0.1.0",
