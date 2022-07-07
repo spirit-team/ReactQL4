@@ -141,7 +141,7 @@
     "match-sorter": "^4.1.0",
     "material-ui-dropzone": "^3.5.0",
     "microseconds": "^0.1.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "mui-downshift": "^1.4.1",
     "node-sass": "^4.14.1",
     "notistack": "0.7.0",
